@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,7 +23,7 @@ namespace DataDog.Tracing
             using (var ms = new MemoryStream())
             using (var writer = new StreamWriter(ms, _encoding))
             {
-                _serializer.Serialize(writer, new { spans });
+                _serializer.Serialize(writer, new { traces = spans });
                 writer.Flush();
                 return ms.ToArray();
             }
@@ -31,6 +32,7 @@ namespace DataDog.Tracing
         readonly string _serviceName;
         readonly ILogger _logger;
         readonly BatchBlock<Span> _block = new BatchBlock<Span>(20);
+        readonly Task _shutdownTask;
         readonly HttpClient _client = new HttpClient();
 
         public TraceService(string serviceName, Uri baseUrl = null, ILogger logger = null)
@@ -42,6 +44,7 @@ namespace DataDog.Tracing
             var send = new ActionBlock<byte[]>(PutTraces);
             _block.LinkTo(transform, new DataflowLinkOptions { PropagateCompletion = true });
             transform.LinkTo(send, new DataflowLinkOptions { PropagateCompletion = true });
+            _shutdownTask = send.Completion;
         }
 
         public ISpan BeginTrace(string name, string resource, string type) => new Span(this)
@@ -80,7 +83,7 @@ namespace DataDog.Tracing
         public Task ShutdownAsync()
         {
             _block.Complete();
-            return _block.Completion;
+            return _shutdownTask;
         }
     }
 }
