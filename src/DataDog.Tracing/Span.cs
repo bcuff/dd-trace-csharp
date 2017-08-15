@@ -74,7 +74,6 @@ namespace DataDog.Tracing
             {
                 EnsureNotSealed();
                 (Meta ?? (Meta = new Dictionary<string, string>()))[name] = value;
-                _sealed = true;
             }
         }
 
@@ -88,7 +87,6 @@ namespace DataDog.Tracing
                 meta["error.msg"] = ex.Message;
                 meta["error.type"] = ex.GetType().Name;
                 meta["error.stack"] = ex.StackTrace;
-                _sealed = true;
             }
         }
     }
