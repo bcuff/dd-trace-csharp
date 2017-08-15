@@ -35,7 +35,17 @@ namespace DataDog.Tracing
         readonly Task _shutdownTask;
         readonly HttpClient _client = new HttpClient();
 
-        public TraceService(string serviceName, Uri baseUrl = null, ILogger logger = null)
+        public TraceService(string serviceName)
+            : this(serviceName, null, null)
+        {
+        }
+
+        public TraceService(string serviceName, Uri baseUrl)
+            : this(serviceName, baseUrl, null)
+        {
+        }
+
+        public TraceService(string serviceName, Uri baseUrl, ILogger logger)
         {
             _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
             _client.BaseAddress = baseUrl ?? new Uri("http://localhost:8126");

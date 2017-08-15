@@ -6,7 +6,6 @@ namespace DataDog.Tracing
 {
     abstract class BaseSpan : ISpan
     {
-        readonly Action _onEnd;
         protected bool Sealed;
 
         [JsonProperty("trace_id")]
@@ -56,6 +55,7 @@ namespace DataDog.Tracing
 
         public ISpan Begin(string name, string serviceName, string resource, string type)
         {
+            EnsureNotSealed();
             var child = CreateChild();
             child.TraceId = TraceId;
             child.SpanId = Util.NewSpanId();
@@ -63,7 +63,7 @@ namespace DataDog.Tracing
             child.Resource = resource;
             child.ParentId = SpanId;
             child.Type = type;
-            child.Service = Service;
+            child.Service = serviceName;
             child.Start = Util.GetTimestamp();
             return child;
         }
@@ -86,7 +86,15 @@ namespace DataDog.Tracing
                 Error = 1;
                 meta["error.msg"] = ex.Message;
                 meta["error.type"] = ex.GetType().Name;
-                meta["error.stack"] = ex.StackTrace;
+                var stack = ex.StackTrace;
+                if (stack == null)
+                {
+                    meta.Remove("error.stack");
+                }
+                else
+                {
+                    meta["error.stack"] = stack;
+                }
             }
         }
     }

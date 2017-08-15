@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace DataDog.Tracing
 {
@@ -8,10 +9,15 @@ namespace DataDog.Tracing
     {
         readonly TraceService _service;
 
+        public Trace()
+        {
+            Spans.Add(this);
+        }
+
         public Trace(TraceService service)
+            : this()
         {
             _service = service;
-            Spans.Add(this);
         }
 
         protected override BaseSpan CreateChild()
@@ -25,11 +31,12 @@ namespace DataDog.Tracing
             return result;
         }
 
+        [JsonIgnore]
         public List<BaseSpan> Spans { get; } = new List<BaseSpan>();
 
         protected override void OnEnd()
         {
-            _service.Post(this);
+            _service?.Post(this);
         }
     }
 }
