@@ -18,12 +18,12 @@ namespace DataDog.Tracing
         static readonly JsonSerializer _serializer = new JsonSerializer();
         static readonly MediaTypeHeaderValue _contentHeader = new MediaTypeHeaderValue("application/json");
 
-        static byte[] SerializeSpans(Span[] spans)
+        static byte[] SerializeTraces(Trace trace)
         {
             using (var ms = new MemoryStream())
             using (var writer = new StreamWriter(ms, _encoding))
             {
-                _serializer.Serialize(writer, new { traces = spans });
+                _serializer.Serialize(writer, new [] { trace.Spans });
                 writer.Flush();
                 return ms.ToArray();
             }
@@ -31,7 +31,7 @@ namespace DataDog.Tracing
 
         readonly string _serviceName;
         readonly ILogger _logger;
-        readonly BatchBlock<Span> _block = new BatchBlock<Span>(20);
+        readonly ITargetBlock<Trace> _block;
         readonly Task _shutdownTask;
         readonly HttpClient _client = new HttpClient();
 
@@ -40,14 +40,14 @@ namespace DataDog.Tracing
             _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
             _client.BaseAddress = baseUrl ?? new Uri("http://localhost:8126");
             _logger = logger;
-            var transform = new TransformBlock<Span[], byte[]>((Func<Span[], byte[]>)SerializeSpans);
+            var transform = new TransformBlock<Trace, byte[]>((Func<Trace, byte[]>)SerializeTraces);
             var send = new ActionBlock<byte[]>(PutTraces);
-            _block.LinkTo(transform, new DataflowLinkOptions { PropagateCompletion = true });
             transform.LinkTo(send, new DataflowLinkOptions { PropagateCompletion = true });
             _shutdownTask = send.Completion;
+            _block = transform;
         }
 
-        public ISpan BeginTrace(string name, string resource, string type) => new Span(this)
+        public ISpan BeginTrace(string name, string resource, string type) => new Trace(this)
         {
             TraceId = Util.NewTraceId(),
             SpanId = Util.NewSpanId(),
@@ -66,6 +66,8 @@ namespace DataDog.Tracing
                 content.Headers.ContentType = _contentHeader;
                 using (var response = await _client.PutAsync("/v0.3/traces", content))
                 {
+                    Console.WriteLine("PUT responsed with " + response.StatusCode);
+                    Console.WriteLine(await response.Content.ReadAsStringAsync());
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger?.LogError($"HTTP {response.StatusCode} from PUT /v0.3/traces");
@@ -78,7 +80,7 @@ namespace DataDog.Tracing
             }
         }
 
-        internal void Post(Span span) => _block.Post(span);
+        internal void Post(Trace trace) => _block.Post(trace);
 
         public Task ShutdownAsync()
         {
