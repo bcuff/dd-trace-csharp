@@ -9,10 +9,19 @@ namespace DataDog.Tracing
     {
         static readonly AsyncLocal<ISpan> _current = new AsyncLocal<ISpan>();
 
+        /// <summary>
+        /// Gets the current span or <c>null</c> if no span was set up.
+        /// </summary>
         public static ISpan Current
         {
             get => _current.Value;
             internal set => _current.Value = value;
         }
+
+        /// <summary>
+        /// Clears the TraceContext from the current scope.
+        /// This is useful for protecting things that shouldn't have access to it. e.g. background work.
+        /// </summary>
+        public static void Reset() => _current.Value = null;
     }
 }
