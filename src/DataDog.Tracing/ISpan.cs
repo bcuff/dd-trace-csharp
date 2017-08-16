@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DataDog.Tracing
 {
+    /// <summary>
+    /// Encapsulates an APM trace or a span within a trace.
+    /// </summary>
     public interface ISpan : IDisposable
     {
         /// <summary>

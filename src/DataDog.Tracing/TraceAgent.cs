@@ -12,13 +12,13 @@ using Newtonsoft.Json;
 
 namespace DataDog.Tracing
 {
-    public class TraceService
+    public class TraceAgent : IObserver<Trace>
     {
         static readonly Encoding _encoding = new UTF8Encoding(false);
         static readonly JsonSerializer _serializer = new JsonSerializer();
         static readonly MediaTypeHeaderValue _contentHeader = new MediaTypeHeaderValue("application/json");
 
-        static byte[] SerializeTraces(Trace trace)
+        static byte[] SerializeTraces(RootSpan trace)
         {
             using (var ms = new MemoryStream())
             using (var writer = new StreamWriter(ms, _encoding))
@@ -29,47 +29,29 @@ namespace DataDog.Tracing
             }
         }
 
-        readonly string _serviceName;
         readonly ILogger _logger;
-        readonly ITargetBlock<Trace> _block;
-        readonly Task _shutdownTask;
+        readonly ITargetBlock<RootSpan> _block;
         readonly HttpClient _client = new HttpClient();
 
-        public TraceService(string serviceName)
-            : this(serviceName, null, null)
+        public TraceAgent()
+            : this(null, null)
         {
         }
 
-        public TraceService(string serviceName, Uri baseUrl)
-            : this(serviceName, baseUrl, null)
+        public TraceAgent(Uri baseUrl)
+            : this(baseUrl, null)
         {
         }
 
-        public TraceService(string serviceName, Uri baseUrl, ILogger logger)
+        public TraceAgent(Uri baseUrl, ILogger logger)
         {
-            _serviceName = serviceName ?? throw new ArgumentNullException(nameof(serviceName));
             _client.BaseAddress = baseUrl ?? new Uri("http://localhost:8126");
             _logger = logger;
-            var transform = new TransformBlock<Trace, byte[]>((Func<Trace, byte[]>)SerializeTraces);
+            var transform = new TransformBlock<RootSpan, byte[]>((Func<RootSpan, byte[]>)SerializeTraces);
             var send = new ActionBlock<byte[]>(PutTraces);
             transform.LinkTo(send, new DataflowLinkOptions { PropagateCompletion = true });
-            _shutdownTask = send.Completion;
             _block = transform;
         }
-
-        public IDisposable BeginTraceContext(string name, string resource, string type)
-            => new TraceContextScope((Trace)BeginTrace(name, resource, type));
-
-        public ISpan BeginTrace(string name, string resource, string type) => new Trace(this)
-        {
-            TraceId = Util.NewTraceId(),
-            SpanId = Util.NewSpanId(),
-            Name = name,
-            Resource = resource,
-            Type = type,
-            Service = _serviceName,
-            Start = Util.GetTimestamp(),
-        };
 
         private async Task PutTraces(byte[] tracesBody)
         {
@@ -93,12 +75,19 @@ namespace DataDog.Tracing
             }
         }
 
-        internal void Post(Trace trace) => _block.Post(trace);
-
-        public Task ShutdownAsync()
+        public void OnCompleted()
         {
             _block.Complete();
-            return _shutdownTask;
+        }
+
+        public void OnError(Exception error)
+        {
+            _block.Fault(error);
+        }
+
+        public void OnNext(Trace value)
+        {
+            _block.Post(value.Root);
         }
     }
 }

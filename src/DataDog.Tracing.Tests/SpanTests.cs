@@ -14,7 +14,7 @@ namespace DataDog.Tracing.Tests
         [Test]
         public void Span_CreateChild_should_populate_expected_fields()
         {
-            var trace = new Trace();
+            var trace = new RootSpan();
             var child = (Span)trace.Begin("foobar", "some-service", "some-resource", "some-type");
             child.Name.Should().Be("foobar");
             child.Service.Should().Be("some-service");
@@ -37,7 +37,7 @@ namespace DataDog.Tracing.Tests
         [TestCase("123", "345")]
         public void Span_SetMeta_should_populate_expected_meta(string key, string value)
         {
-            var trace = new Trace();
+            var trace = new RootSpan();
             trace.SetMeta(key, value);
             trace.Meta.Should().NotBeNull();
             trace.Meta.ContainsKey(key).Should().BeTrue();
@@ -61,10 +61,10 @@ namespace DataDog.Tracing.Tests
                 span.Invoking(t => t.Dispose()).ShouldThrow<InvalidOperationException>();
             }
 
-            var trace = new Trace();
+            var trace = new RootSpan();
             AssertSeals(trace);
 
-            trace = new Trace();
+            trace = new RootSpan();
             var child = trace.Begin("a", "a", "a", "a");
             AssertSeals(child);
         }
@@ -72,7 +72,7 @@ namespace DataDog.Tracing.Tests
         [Test]
         public void Span_SetError_should_set_expected_meta()
         {
-            var trace = new Trace();
+            var trace = new RootSpan();
             Exception x;
             try
             {

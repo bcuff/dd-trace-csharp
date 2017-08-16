@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Threading;
 using DataDog.Tracing;
 
@@ -8,14 +9,15 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            var service = new TraceService("test-app");
-            using (var span = service.BeginTrace("sample-trace", "Main", "console"))
+            var source = new TraceSource();
+            var agent = new TraceAgent();
+            source.Subscribe(agent);
+            using (var span = source.BeginTrace("sample-trace", "test-app", "Main", "console"))
             {
                 TestSpan(span);
                 TestSpan(span);
                 TestSpan(span);
             }
-            service.ShutdownAsync().Wait();
         }
 
         private static void TestSpan(ISpan span)

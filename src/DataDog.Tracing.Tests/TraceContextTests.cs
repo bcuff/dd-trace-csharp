@@ -13,7 +13,7 @@ namespace DataDog.Tracing.Tests
         [Test]
         public async Task TraceContextScope_should_install_current_and_work_recursively()
         {
-            var trace = new Trace();
+            var trace = new RootSpan();
             TraceContext.Current.Should().BeNull();
             using (new TraceContextScope(trace))
             {

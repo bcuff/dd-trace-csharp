@@ -4,14 +4,23 @@ using System.Text;
 
 namespace DataDog.Tracing
 {
-    internal class TraceContextScope : IDisposable
+    /// <summary>
+    /// Sets up the TraceContext.Current with the specified trace.
+    /// </summary>
+    public class TraceContextScope : IDisposable
     {
-        readonly Trace _trace;
+        readonly Span _span;
 
-        public TraceContextScope(Trace trace)
+        /// <summary>
+        /// Sets up the current span on <c>TraceContext.Current</c> within an async local context.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        public TraceContextScope(ISpan span)
         {
-            _trace = trace;
-            SetupEvents(trace);
+            if (span == null) throw new ArgumentNullException(nameof(span));
+            var t = span as RootSpan;
+            _span = t ?? throw new ArgumentException($"{nameof(span)} must originate from a {nameof(TraceSource)} instance.");
+            SetupEvents(t);
         }
 
         private static void SetupEvents(Span span)
@@ -25,6 +34,6 @@ namespace DataDog.Tracing
             };
         }
 
-        public void Dispose() => _trace.Dispose();
+        public void Dispose() => _span.Dispose();
     }
 }

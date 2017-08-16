@@ -18,6 +18,11 @@ namespace DataDog.Tracing
 
         static readonly long EpochTicks = new DateTime(1970, 1, 1).Ticks;
 
+        public static TimeSpan FromNanoseconds(long nanoseconds)
+        {
+            return new TimeSpan(nanoseconds / 100);
+        }
+
         public static long GetTimestamp() => (DateTime.UtcNow.Ticks - EpochTicks) * 100; // 100 nanoseconds in a tick
     }
 }

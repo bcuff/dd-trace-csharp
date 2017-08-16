@@ -1,43 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace DataDog.Tracing
 {
-    sealed class Trace : Span
+    /// <summary>
+    /// Encapsulates a completed trace.
+    /// </summary>
+    public class Trace
     {
-        readonly TraceService _service;
-
-        public Trace()
+        internal Trace(RootSpan root)
         {
-            Spans.Add(this);
+            Root = root;
         }
 
-        public Trace(TraceService service)
-            : this()
-        {
-            _service = service;
-        }
+        public string Name => Root.Name;
 
-        protected override void OnBeginChild(Span child)
-        {
-            lock (this)
-            {
-                EnsureNotSealed();
-                Spans.Add(child);
-            }
-            child.BeginChild += OnBeginChild;
-            base.OnBeginChild(child);
-        }
+        public string ServiceName => Root.Service;
 
-        protected override void OnEnd()
-        {
-            base.OnEnd();
-            _service?.Post(this);
-        }
- 
-        [JsonIgnore]
-        public List<Span> Spans { get; } = new List<Span>();
-   }
+        public string Resource => Root.Resource;
+
+        public string Type => Root.Type;
+
+        public bool HasError => Root.Error != 0;
+
+        public TimeSpan Duration => Util.FromNanoseconds(Root.Duration);
+
+        internal RootSpan Root { get; }
+    }
 }
