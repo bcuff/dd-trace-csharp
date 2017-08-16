@@ -4,8 +4,11 @@ using Newtonsoft.Json;
 
 namespace DataDog.Tracing
 {
-    abstract class BaseSpan : ISpan
+    class Span : ISpan
     {
+        public event Action<Span> BeginChild;
+        public event Action End;
+
         protected bool Sealed;
 
         [JsonProperty("trace_id")]
@@ -31,8 +34,15 @@ namespace DataDog.Tracing
         [JsonProperty("meta", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Dictionary<string, string> Meta { get; set; }
 
-        protected abstract BaseSpan CreateChild();
-        protected abstract void OnEnd();
+        protected virtual void OnBeginChild(Span child)
+        {
+            BeginChild?.Invoke(child);
+        }
+
+        protected virtual void OnEnd()
+        {
+            End?.Invoke();
+        }
 
         public void Dispose()
         {
@@ -56,7 +66,7 @@ namespace DataDog.Tracing
         public ISpan Begin(string name, string serviceName, string resource, string type)
         {
             EnsureNotSealed();
-            var child = CreateChild();
+            var child = new Span();
             child.TraceId = TraceId;
             child.SpanId = Util.NewSpanId();
             child.Name = name;
@@ -65,6 +75,7 @@ namespace DataDog.Tracing
             child.Type = type;
             child.Service = serviceName;
             child.Start = Util.GetTimestamp();
+            OnBeginChild(child);
             return child;
         }
 

@@ -57,6 +57,9 @@ namespace DataDog.Tracing
             _block = transform;
         }
 
+        public IDisposable BeginTraceContext(string name, string resource, string type)
+            => new TraceContextScope((Trace)BeginTrace(name, resource, type));
+
         public ISpan BeginTrace(string name, string resource, string type) => new Trace(this)
         {
             TraceId = Util.NewTraceId(),

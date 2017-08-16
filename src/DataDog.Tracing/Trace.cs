@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace DataDog.Tracing
 {
-    sealed class Trace : BaseSpan
+    sealed class Trace : Span
     {
         readonly TraceService _service;
 
@@ -20,23 +20,24 @@ namespace DataDog.Tracing
             _service = service;
         }
 
-        protected override BaseSpan CreateChild()
+        protected override void OnBeginChild(Span child)
         {
-            var result = new Span(this);
             lock (this)
             {
                 EnsureNotSealed();
-                Spans.Add(result);
+                Spans.Add(child);
             }
-            return result;
+            child.BeginChild += OnBeginChild;
+            base.OnBeginChild(child);
         }
-
-        [JsonIgnore]
-        public List<BaseSpan> Spans { get; } = new List<BaseSpan>();
 
         protected override void OnEnd()
         {
+            base.OnEnd();
             _service?.Post(this);
         }
-    }
+ 
+        [JsonIgnore]
+        public List<Span> Spans { get; } = new List<Span>();
+   }
 }
