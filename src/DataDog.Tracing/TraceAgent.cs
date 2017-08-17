@@ -62,7 +62,7 @@ namespace DataDog.Tracing
                 content.Headers.ContentType = _contentHeader;
                 using (var response = await _client.PutAsync("/v0.3/traces", content))
                 {
-                    Console.WriteLine("PUT responsed with " + response.StatusCode);
+                    Console.WriteLine("PUT responded with " + response.StatusCode);
                     Console.WriteLine(await response.Content.ReadAsStringAsync());
                     if (!response.IsSuccessStatusCode)
                     {
