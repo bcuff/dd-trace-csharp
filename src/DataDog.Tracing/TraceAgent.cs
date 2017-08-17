@@ -29,26 +29,33 @@ namespace DataDog.Tracing
             }
         }
 
+        const int defaultQueueCapacity = 200;
+
         readonly ILogger _logger;
         readonly ITargetBlock<RootSpan> _block;
         readonly HttpClient _client = new HttpClient();
 
         public TraceAgent()
-            : this(null, null)
+            : this(null, defaultQueueCapacity, null)
         {
         }
 
         public TraceAgent(Uri baseUrl)
-            : this(baseUrl, null)
+            : this(baseUrl, defaultQueueCapacity, null)
         {
         }
 
-        public TraceAgent(Uri baseUrl, ILogger logger)
+        public TraceAgent(Uri baseUrl, int queueCapacity)
+            : this(baseUrl, queueCapacity, null)
+        {
+        }
+
+        public TraceAgent(Uri baseUrl, int queueCapacity, ILogger logger)
         {
             _client.BaseAddress = baseUrl ?? new Uri("http://localhost:8126");
             _logger = logger;
-            var transform = new TransformBlock<RootSpan, byte[]>((Func<RootSpan, byte[]>)SerializeTraces);
-            var send = new ActionBlock<byte[]>(PutTraces);
+            var transform = new TransformBlock<RootSpan, byte[]>((Func<RootSpan, byte[]>)SerializeTraces, new ExecutionDataflowBlockOptions { BoundedCapacity = queueCapacity });
+            var send = new ActionBlock<byte[]>(PutTraces, new ExecutionDataflowBlockOptions { BoundedCapacity = queueCapacity });
             transform.LinkTo(send, new DataflowLinkOptions { PropagateCompletion = true });
             _block = transform;
             Completion = send.Completion;
