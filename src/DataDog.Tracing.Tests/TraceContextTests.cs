@@ -22,12 +22,15 @@ namespace DataDog.Tracing.Tests
 
                 Span s1 = null, s2 = null, s3 = null;
                 var t1 = SomeAsyncTask(async () => s1 = (Span)TraceContext.Current);
+                TraceContext.Current.Should().Be(trace);
                 var t2 = SomeAsyncTask(async () =>
                 {
                     s2 = (Span)TraceContext.Current;
                     await SomeAsyncTask(async () => s3 = (Span)TraceContext.Current);
                 });
+                TraceContext.Current.Should().Be(trace);
                 await Task.WhenAll(t1, t2);
+                TraceContext.Current.Should().Be(trace);
 
                 s1.Should().NotBeNull();
                 s1.TraceId.Should().Be(trace.TraceId);
@@ -46,6 +49,7 @@ namespace DataDog.Tracing.Tests
                 trace.Spans.Select(s => s.SpanId).Distinct().Count().Should().Be(4);
                 trace.Spans.Should().Contain(new[] { trace, s1, s2, s3 });
             }
+            TraceContext.Current.Should().BeNull();
         }
 
         private async Task SomeAsyncTask(Func<Task> inner)
