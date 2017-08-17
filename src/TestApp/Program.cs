@@ -11,13 +11,15 @@ namespace TestApp
         {
             var source = new TraceSource();
             var agent = new TraceAgent();
-            source.Subscribe(agent);
+            using (source.Subscribe(agent))
             using (var span = source.BeginTrace("sample-trace", "test-app", "Main", "console"))
             {
                 TestSpan(span);
                 TestSpan(span);
                 TestSpan(span);
             }
+            agent.OnCompleted();
+            agent.Completion.Wait();
         }
 
         private static void TestSpan(ISpan span)

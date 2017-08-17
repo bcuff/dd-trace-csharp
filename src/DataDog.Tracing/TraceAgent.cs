@@ -51,6 +51,7 @@ namespace DataDog.Tracing
             var send = new ActionBlock<byte[]>(PutTraces);
             transform.LinkTo(send, new DataflowLinkOptions { PropagateCompletion = true });
             _block = transform;
+            Completion = send.Completion;
         }
 
         private async Task PutTraces(byte[] tracesBody)
@@ -74,6 +75,8 @@ namespace DataDog.Tracing
                 _logger?.LogError(0, ex, "PUT /v0.3/traces failed");
             }
         }
+
+        public Task Completion { get; }
 
         public void OnCompleted()
         {
