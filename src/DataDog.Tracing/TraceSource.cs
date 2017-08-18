@@ -8,7 +8,7 @@ namespace DataDog.Tracing
     /// <summary>
     /// For creating new traces.
     /// </summary>
-    public class TraceSource : IObservable<Trace>
+    public class TraceSource : IObservable<Trace>, ISpanSource
     {
         readonly Subject<Trace> _subject = new Subject<Trace>();
 
@@ -22,7 +22,7 @@ namespace DataDog.Tracing
         /// <param name="resource">The underlying resource. e.g. /home for web or GET for memcached. This shouldn't have too many unique combinations.</param>
         /// <param name="type">The category of the service. Typically web, db, or cache.</param>
         /// <returns>The new trace.</returns>
-       public ISpan BeginTrace(string name, string serviceName, string resource, string type) => new RootSpan(_subject)
+       public ISpan Begin(string name, string serviceName, string resource, string type) => new RootSpan(_subject)
         {
             TraceId = Util.NewTraceId(),
             SpanId = Util.NewSpanId(),
