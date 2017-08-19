@@ -21,6 +21,8 @@ namespace DataDog.Tracing.Sql
             _spanSource = spanSource ?? throw new ArgumentNullException(nameof(spanSource));
         }
 
+        public IDbConnection InnerConnection => _connection;
+
         public void Dispose() => _connection.Dispose();
 
         // todo - span around transactions

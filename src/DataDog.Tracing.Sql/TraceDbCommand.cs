@@ -20,6 +20,8 @@ namespace DataDog.Tracing.Sql
             _spanSource = spanSource;
         }
 
+        public IDbCommand InnerCommand => _command;
+
         public void Dispose() => _command.Dispose();
 
         public void Cancel() => _command.Cancel();
