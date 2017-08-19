@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using NUnit.Framework;
@@ -11,7 +9,7 @@ namespace DataDog.Tracing.Tests
     public class TraceContextTests
     {
         [Test]
-        public async Task TraceContextScope_should_install_current_and_work_recursively()
+        public async Task TraceContextScope_should_install_current()
         {
             var trace = new RootSpan();
             TraceContext.Current.Should().BeNull();
@@ -32,29 +30,52 @@ namespace DataDog.Tracing.Tests
                 await Task.WhenAll(t1, t2);
                 TraceContext.Current.Should().Be(trace);
 
-                s1.Should().NotBeNull();
-                s1.TraceId.Should().Be(trace.TraceId);
-                s1.ParentId.Should().Be(trace.SpanId);
-
-                s2.Should().NotBeNull();
-                s2.TraceId.Should().Be(trace.TraceId);
-                s2.ParentId.Should().Be(trace.SpanId);
-
-                s3.Should().NotBeNull();
-                s3.TraceId.Should().Be(trace.TraceId);
-                s3.ParentId.Should().Be(s2.SpanId);
-
-                new [] { s1.SpanId, s2.SpanId, s3.SpanId }.Distinct().Count().Should().Be(3);
-                trace.Spans.Count.Should().Be(4);
-                trace.Spans.Select(s => s.SpanId).Distinct().Count().Should().Be(4);
-                trace.Spans.Should().Contain(new[] { trace, s1, s2, s3 });
+                s1.Should().Be(trace);
+                s2.Should().Be(trace);
+                s3.Should().Be(trace);
             }
             TraceContext.Current.Should().BeNull();
         }
 
+        [Test]
+        public async Task TraceContextScope_should_install_current_and_work_recursively()
+        {
+            RootSpan trace;
+            using (trace = new RootSpan())
+            {
+                TraceContext.Current.Should().BeNull();
+                await SomeAsyncTask(async () => { TraceContext.Current.Should().BeNull(); });
+                using (new TraceContextScope(trace))
+                {
+                    TraceContext.Current.Should().Be(trace);
+                    await SomeAsyncTask(async () => { TraceContext.Current.Should().Be(trace); });
+                    using (var span = trace.Begin("child", "child", "child", "child"))
+                    {
+                        TraceContext.Current.Should().Be(trace);
+                        await SomeAsyncTask(async () => { TraceContext.Current.Should().Be(trace); });
+                        using (new TraceContextScope(span))
+                        {
+                            TraceContext.Current.Should().Be(span);
+                            await SomeAsyncTask(async () => { TraceContext.Current.Should().Be(span); });
+                        }
+                        TraceContext.Current.Should().Be(trace);
+                        await SomeAsyncTask(async () => { TraceContext.Current.Should().Be(trace); });
+                    }
+                    TraceContext.Current.Should().Be(trace);
+                    await SomeAsyncTask(async () => { TraceContext.Current.Should().Be(trace); });
+                }
+                trace.Sealed.Should().BeFalse(); // scope shouldn't dispose the trace
+                TraceContext.Current.Should().BeNull();
+                await SomeAsyncTask(async () => { TraceContext.Current.Should().BeNull(); });
+            }
+            trace.Sealed.Should().BeTrue();
+            TraceContext.Current.Should().BeNull();
+            await SomeAsyncTask(async () => { TraceContext.Current.Should().BeNull(); });
+        }
+
         private async Task SomeAsyncTask(Func<Task> inner)
         {
-            using (TraceContext.Current.Begin("some-async-task", "something", "resource", "test"))
+            using (TraceContext.Current?.Begin("some-async-task", "something", "resource", "test"))
             {
                 await Task.CompletedTask;
                 await inner();
