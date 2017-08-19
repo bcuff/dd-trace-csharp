@@ -68,7 +68,7 @@ namespace DataDog.Tracing.Sql
                 if (span != null)
                 {
                     const string metaKey = "sql." + nameof(CommandBehavior);
-                    span.SetMeta(metaKey, ((int)behavior).ToString("x"));
+                    span.SetMeta(metaKey, behavior.ToString("x"));
                     SetMeta(span);
                 }
                 return _command.ExecuteReader(behavior);

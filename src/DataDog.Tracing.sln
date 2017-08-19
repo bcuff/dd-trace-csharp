@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Tests", "Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.Sql", "DataDog.Tracing.Sql\DataDog.Tracing.Sql.csproj", "{6757FB66-4AD9-437C-AFC0-2C67C9691C37}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.Sql.Tests", "DataDog.Tracing.Sql.Tests\DataDog.Tracing.Sql.Tests.csproj", "{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6757FB66-4AD9-437C-AFC0-2C67C9691C37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6757FB66-4AD9-437C-AFC0-2C67C9691C37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6757FB66-4AD9-437C-AFC0-2C67C9691C37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
