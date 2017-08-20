@@ -28,6 +28,7 @@ namespace DataDog.Tracing
                 Spans.Add(child);
             }
             base.OnBeginChild(child);
+            child.BeginChild += OnBeginChild;
         }
 
         protected override void OnEnd()
