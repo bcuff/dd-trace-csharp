@@ -6,6 +6,7 @@ namespace DataDog.Tracing
 {
     class Span : ISpan
     {
+        public event Action<Span> BeginChild;
         protected internal bool Sealed;
 
         [JsonProperty("trace_id")]
@@ -33,6 +34,7 @@ namespace DataDog.Tracing
 
         protected virtual void OnBeginChild(Span child)
         {
+            BeginChild?.Invoke(child);
         }
 
         protected virtual void OnEnd()
