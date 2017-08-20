@@ -12,7 +12,7 @@ namespace TestApp
             var source = new TraceSource();
             var agent = new TraceAgent();
             using (source.Subscribe(agent))
-            using (var span = source.BeginTrace("sample-trace", "test-app", "Main", "console"))
+            using (var span = source.Begin("sample-trace", "test-app", "Main", "console"))
             {
                 TestSpan(span);
                 TestSpan(span);

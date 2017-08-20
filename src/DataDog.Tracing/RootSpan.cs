@@ -27,7 +27,6 @@ namespace DataDog.Tracing
                 EnsureNotSealed();
                 Spans.Add(child);
             }
-            child.BeginChild += OnBeginChild;
             base.OnBeginChild(child);
         }
 
