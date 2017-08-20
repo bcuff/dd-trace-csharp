@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace DataDog.Tracing.Http
 {
+    /// <summary>
+    /// For wrapping other HttpMessageHandler implementations for tracing purposes.
+    /// </summary>
     public class TraceHttpMessageHandler : HttpMessageHandler
     {
         // works around SendAsync being declared internal protected
@@ -37,11 +40,20 @@ namespace DataDog.Tracing.Http
         readonly HttpMessageHandler _innerHandler;
         readonly ISpanSource _spanSource;
 
+        /// <summary>
+        /// Creates a new TraceHttpMessageHandler using traces from TraceContext.Current.
+        /// </summary>
+        /// <param name="innerHandler">The inner http handler to trace.</param>
         public TraceHttpMessageHandler(HttpMessageHandler innerHandler)
             : this(innerHandler, TraceContextSpanSource.Instance)
         {
         }
 
+        /// <summary>
+        /// Creates a new TraceHttpMessageHandler using the specified ISpanSource.
+        /// </summary>
+        /// <param name="innerHandler">The inner http handler to trace.</param>
+        /// <param name="spanSource">The span source to open new spans from.</param>
         public TraceHttpMessageHandler(HttpMessageHandler innerHandler, ISpanSource spanSource)
         {
             _innerHandler = innerHandler ?? throw new ArgumentNullException(nameof(innerHandler));
@@ -56,7 +68,7 @@ namespace DataDog.Tracing.Http
             {
                 span?.SetMeta("http.url", request.RequestUri.ToString());
                 var response = await SendFunc(_innerHandler, request, cancellationToken);
-                span?.SetMeta("http.status_code", response.StatusCode.ToString());
+                span?.SetMeta("http.status_code", ((int)response.StatusCode).ToString());
                 return response;
             }
             catch (Exception ex)
