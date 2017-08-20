@@ -46,6 +46,10 @@ namespace DataDog.Tracing.Tests.Http
             var response = await _client.GetAsync(url);
             ((int)response.StatusCode).Should().Be(statusCode);
             _lastTrace.Should().NotBeNull();
+            _lastTrace.Root.Spans[0].Name.Should().Be($"HTTP GET");
+            _lastTrace.Root.Spans[0].Service.Should().Be("http");
+            _lastTrace.Root.Spans[0].Type.Should().Be("http");
+            _lastTrace.Root.Spans[0].Resource.Should().Be(new Uri(url).Host);
             _lastTrace.Root.Spans[0].Meta["http.url"].Should().Be(url);
             _lastTrace.Root.Spans[0].Meta["http.status_code"].Should().Be(statusCode.ToString());
         }
