@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing", "DataDog.Tracing\DataDog.Tracing.csproj", "{196314C0-6ECB-40C4-ABEC-3524FED1C763}"
 EndProject
@@ -9,9 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Tests", "DataDog.Tracing.Tests\DataDog.Tracing.Tests.csproj", "{716F4853-641A-462E-8266-8B509252A039}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.Sql", "DataDog.Tracing.Sql\DataDog.Tracing.Sql.csproj", "{6757FB66-4AD9-437C-AFC0-2C67C9691C37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Sql", "DataDog.Tracing.Sql\DataDog.Tracing.Sql.csproj", "{6757FB66-4AD9-437C-AFC0-2C67C9691C37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.Sql.Tests", "DataDog.Tracing.Sql.Tests\DataDog.Tracing.Sql.Tests.csproj", "{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Sql.Tests", "DataDog.Tracing.Sql.Tests\DataDog.Tracing.Sql.Tests.csproj", "{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.AspNetCore", "DataDog.Tracing.AspNetCore\DataDog.Tracing.AspNetCore.csproj", "{C919794A-0DD6-453F-992F-8CD8BC172CF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApp", "TestWebApp\TestWebApp.csproj", "{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +43,14 @@ Global
 		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C919794A-0DD6-453F-992F-8CD8BC172CF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C919794A-0DD6-453F-992F-8CD8BC172CF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C919794A-0DD6-453F-992F-8CD8BC172CF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C919794A-0DD6-453F-992F-8CD8BC172CF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
