@@ -10,11 +10,13 @@ namespace DataDog.Tracing.AspNetCore
         public static IApplicationBuilder UseDataDogTracing(this IApplicationBuilder app, TraceSource source, string serviceName = "web") => app.Use(async (context, next) =>
         {
             var resource = context.Request.Host.Host;
-            using (var span = source.Begin(context.Request.Method, serviceName, resource, "web"))
+            var path = context.Request.Path.HasValue ? context.Request.Path.Value : string.Empty;
+            var name = $"{context.Request.Method} {path}";
+            using (var span = source.Begin(path, serviceName, resource, "web"))
             using (var scope = new TraceContextScope(span))
             {
                 span.SetMeta("http.method", context.Request.Method);
-                span.SetMeta("http.path", context.Request.Path.HasValue ? context.Request.Path.Value : string.Empty);
+                span.SetMeta("http.path", path);
                 span.SetMeta("http.query", context.Request.QueryString.HasValue ? context.Request.QueryString.Value : string.Empty);
                 try
                 {
