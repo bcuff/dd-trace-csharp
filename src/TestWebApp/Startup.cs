@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using DataDog.Tracing;
 using DataDog.Tracing.AspNetCore;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TestWebApp
 {
@@ -21,6 +22,10 @@ namespace TestWebApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc().AddMvcOptions(mvc =>
+            {
+                mvc.Filters.Add(new DataDogTracingFilter());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,10 +41,7 @@ namespace TestWebApp
             SetupSourceListener(source);
             app.UseDataDogTracing(source);
 
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            app.UseMvc();
         }
 
         private void SetupSourceListener(TraceSource source)

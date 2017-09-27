@@ -10,6 +10,11 @@ namespace DataDog.Tracing
     public interface ISpan : ISpanSource, IDisposable
     {
         /// <summary>
+        /// Gets or sets the resource name on the span.
+        /// </summary>
+        string Resource { get; set; }
+
+        /// <summary>
         /// Sets metadata on the span. This is any additional information you might want to see when looking at the trace.
         /// e.g. keys or queries.
         /// </summary>
