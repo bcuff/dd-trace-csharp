@@ -12,7 +12,12 @@ namespace DataDog.Tracing.AspNetCore
             var span = TraceContext.Current;
             if (span != null)
             {
-                span.Resource = context.ActionDescriptor.DisplayName;
+                var routeValues = context.ActionDescriptor.RouteValues;
+                routeValues.TryGetValue("action", out string action);
+                routeValues.TryGetValue("controller", out string controller);
+                action = action ?? "unknown";
+                controller = controller ?? "unknown";
+                span.Resource = $"{controller}.{action}";
             }
         }
     }
