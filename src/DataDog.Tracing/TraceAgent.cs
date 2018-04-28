@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -69,8 +67,9 @@ namespace DataDog.Tracing
                 content.Headers.ContentType = _contentHeader;
                 using (var response = await _client.PutAsync("/v0.3/traces", content))
                 {
-                    Console.WriteLine("PUT responded with " + response.StatusCode);
-                    Console.WriteLine(await response.Content.ReadAsStringAsync());
+                    _logger?.LogDebug("PUT responded with " + response.StatusCode);
+                    _logger?.LogDebug(await response.Content.ReadAsStringAsync());
+
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger?.LogError($"HTTP {response.StatusCode} from PUT /v0.3/traces");
