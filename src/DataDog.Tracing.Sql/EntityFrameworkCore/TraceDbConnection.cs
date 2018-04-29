@@ -6,7 +6,10 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
 {
     public class TraceDbConnection : DbConnection
     {
-        private const string ServiceName = "sql";
+        private const string DefaultServiceName = "sql";
+        private const string TypeName = "sql";
+
+        private string ServiceName { get; }
 
         private readonly ISpanSource _spanSource;
         private readonly DbConnection _connection;
@@ -30,19 +33,29 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
         }
 
         public TraceDbConnection(DbConnection connection)
-            : this(connection, TraceContextSpanSource.Instance) { }
+            : this(connection, DefaultServiceName, TraceContextSpanSource.Instance) { }
+
+        public TraceDbConnection(DbConnection connection, string serviceName)
+            : this(connection, serviceName, TraceContextSpanSource.Instance) { }
 
         public TraceDbConnection(DbConnection connection, ISpanSource spanSource)
+            : this(connection, DefaultServiceName, spanSource) { }
+
+        public TraceDbConnection(DbConnection connection, string serviceName, ISpanSource spanSource)
         {
             _connection = connection ?? throw new ArgumentNullException(nameof(connection));
             _spanSource = spanSource ?? throw new ArgumentNullException(nameof(spanSource));
+
+            ServiceName = string.IsNullOrWhiteSpace(serviceName)
+                ? DefaultServiceName
+                : serviceName;
         }
 
-        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) =>
-            new TraceDbTransaction(this, _connection.BeginTransaction(isolationLevel));
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
+            => new TraceDbTransaction(this, _connection.BeginTransaction(isolationLevel), ServiceName, _spanSource);
 
         protected override DbCommand CreateDbCommand()
-            => new TraceDbCommand(_connection.CreateCommand(), _spanSource);
+            => new TraceDbCommand(_connection.CreateCommand(), ServiceName, _spanSource);
 
         public new void Dispose()
             => _connection.Dispose();
@@ -55,7 +68,7 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
 
         public override void Open()
         {
-            var span = _spanSource.Begin("sql.connect", ServiceName, _connection.Database, ServiceName);
+            var span = _spanSource.Begin("sql.connect", ServiceName, _connection.Database, TypeName);
             try
             {
                 _connection.Open();

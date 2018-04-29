@@ -6,7 +6,10 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
 {
     public class TraceDbCommand : DbCommand
     {
-        private const string ServiceName = "sql";
+        private const string DefaultServiceName = "sql";
+        private const string TypeName = "sql";
+
+        private string ServiceName { get; }
 
         private readonly DbCommand _command;
         private readonly ISpanSource _spanSource;
@@ -61,12 +64,22 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
         }
 
         public TraceDbCommand(DbCommand command)
-            : this(command, TraceContextSpanSource.Instance) { }
+            : this(command, DefaultServiceName, TraceContextSpanSource.Instance) { }
+
+        public TraceDbCommand(DbCommand command, string serviceName)
+            : this(command, serviceName, TraceContextSpanSource.Instance) { }
 
         public TraceDbCommand(DbCommand command, ISpanSource spanSource)
+            : this(command, DefaultServiceName, spanSource) { }
+
+        public TraceDbCommand(DbCommand command, string serviceName, ISpanSource spanSource)
         {
             _command = command ?? throw new ArgumentNullException(nameof(command));
             _spanSource = spanSource ?? throw new ArgumentNullException(nameof(spanSource));
+
+            ServiceName = string.IsNullOrWhiteSpace(serviceName)
+                ? DefaultServiceName
+                : serviceName;
         }
 
         public new void Dispose() => _command.Dispose();
@@ -80,7 +93,7 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
         protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
         {
             const string name = "sql." + nameof(ExecuteReader);
-            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, TypeName);
             try
             {
                 if (span != null)
@@ -106,7 +119,7 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
         public override int ExecuteNonQuery()
         {
             const string name = "sql." + nameof(ExecuteNonQuery);
-            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, TypeName);
             try
             {
                 var result = _command.ExecuteNonQuery();
@@ -132,7 +145,7 @@ namespace DataDog.Tracing.Sql.EntityFrameworkCore
         public override object ExecuteScalar()
         {
             const string name = "sql." + nameof(ExecuteScalar);
-            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, TypeName);
             try
             {
                 if (span != null)
