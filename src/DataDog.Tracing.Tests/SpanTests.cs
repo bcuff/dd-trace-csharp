@@ -1,9 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using DataDog.Tracing;
 using FluentAssertions;
 
 namespace DataDog.Tracing.Tests

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.Reactive;
-using System.Text;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using NUnit.Framework;
-using SQLitePCL;
 
 namespace DataDog.Tracing.Sql.Tests
 {
