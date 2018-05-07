@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataDog.Tracing
 {
@@ -9,8 +7,8 @@ namespace DataDog.Tracing
     /// </summary>
     public class TraceContextScope : IDisposable
     {
-        readonly ISpan _old;
-        ISpan _span;
+        private readonly ISpan _old;
+        private ISpan _span;
 
         public TraceContextScope(ISpan span)
         {

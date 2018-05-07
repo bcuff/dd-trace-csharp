@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
 
 namespace DataDog.Tracing
 {
@@ -9,6 +6,7 @@ namespace DataDog.Tracing
     {
         [ThreadStatic]
         static Random _random1;
+
         [ThreadStatic]
         static Random _random2;
 
