@@ -1,16 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Authors>bcuff</Authors>
-    <Company>bcuff</Company>
-    <Description>A C# client implementation for DataDog's APM solution for AspNetCore.</Description>
-    <Copyright>2017</Copyright>
-    <PackageLicenseUrl>https://github.com/bcuff/dd-trace-csharp/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/bcuff/dd-trace-csharp</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/bcuff/dd-trace-csharp</RepositoryUrl>
+    <TargetFramework>netstandard1.4</TargetFramework>
     <PackageTags>datadog tracing apm aspnetcore</PackageTags>
-    <RepositoryType>git</RepositoryType>
-    <Version>1.0.3</Version>
+    <Description>A C# client implementation for DataDog's APM solution for AspNetCore.</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.2" />

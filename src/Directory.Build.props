@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.0.5</Version>
+    <AssemblyVersion>1.0.5</AssemblyVersion>
+    <Authors>bcuff</Authors>
+    <Company>bcuff</Company>
+    <Copyright>2017</Copyright>
+    <PackageLicenseUrl>https://github.com/bcuff/dd-trace-csharp/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/bcuff/dd-trace-csharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bcuff/dd-trace-csharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+</Project>

@@ -13,9 +13,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Sql", "Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.Sql.Tests", "DataDog.Tracing.Sql.Tests\DataDog.Tracing.Sql.Tests.csproj", "{CF56F2C7-54B0-4CFD-987D-74BA895D90DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataDog.Tracing.AspNetCore", "DataDog.Tracing.AspNetCore\DataDog.Tracing.AspNetCore.csproj", "{C919794A-0DD6-453F-992F-8CD8BC172CF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataDog.Tracing.AspNetCore", "DataDog.Tracing.AspNetCore\DataDog.Tracing.AspNetCore.csproj", "{C919794A-0DD6-453F-992F-8CD8BC172CF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWebApp", "TestWebApp\TestWebApp.csproj", "{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApp", "TestWebApp\TestWebApp.csproj", "{2DBA2DA2-13A9-4454-99D5-E936DA4B03E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CB1F2C78-A73B-408D-B6D4-78E652A9B556}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
