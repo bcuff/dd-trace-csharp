@@ -1,51 +1,105 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DataDog.Tracing.Sql
 {
-    public class TraceDbCommand : IDbCommand
+    public class TraceDbCommand : DbCommand
     {
         private const string ServiceName = "sql";
-        private readonly IDbCommand _command;
+        private readonly DbCommand _command;
         private readonly ISpanSource _spanSource;
 
-        public TraceDbCommand(IDbCommand command)
+        public TraceDbCommand(DbCommand command)
             : this(command, TraceContextSpanSource.Instance)
         {
         }
 
-        public TraceDbCommand(IDbCommand command, ISpanSource spanSource)
+        public TraceDbCommand(DbCommand command, ISpanSource spanSource)
         {
             _command = command;
             _spanSource = spanSource;
         }
 
         public IDbCommand InnerCommand => _command;
+        
+        #region Overrides
 
-        public void Dispose() => _command.Dispose();
-
-        public void Cancel() => _command.Cancel();
-
-        public IDbDataParameter CreateParameter() => _command.CreateParameter();
-
-        private void SetMeta(ISpan span)
+        public override string CommandText
         {
-            span.SetMeta("sql.CommandText", CommandText);
-            span.SetMeta("sql.CommandType", CommandType.ToString());
+            get => _command.CommandText;
+            set => _command.CommandText = value;
         }
 
-        public int ExecuteNonQuery()
+        public override int CommandTimeout
+        {
+            get => _command.CommandTimeout;
+            set => _command.CommandTimeout = value;
+        }
+
+        public override CommandType CommandType
+        {
+            get => _command.CommandType;
+            set => _command.CommandType = value;
+        }
+
+        protected override DbConnection DbConnection
+        {
+            get => _command.Connection;
+            set => _command.Connection = value;
+        }
+
+        protected override DbParameterCollection DbParameterCollection
+        {
+            get => _command.Parameters;
+        }
+
+        protected override DbTransaction DbTransaction
+        {
+            get => _command.Transaction;
+            set => _command.Transaction = value;
+        }
+
+        public override bool DesignTimeVisible
+        {
+            get => _command.DesignTimeVisible;
+            set => _command.DesignTimeVisible = value;
+        }
+
+        public override UpdateRowSource UpdatedRowSource
+        {
+            get => _command.UpdatedRowSource;
+            set => _command.UpdatedRowSource = value;
+        }
+
+        public override void Cancel()
+        {
+            _command.Cancel();
+        }
+
+        protected override DbParameter CreateDbParameter()
+        {
+            return _command.CreateParameter();
+        }
+
+        public override int ExecuteNonQuery()
         {
             const string name = "sql." + nameof(ExecuteNonQuery);
+
             var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
             try
             {
-                var result = _command.ExecuteNonQuery();
+                int result = _command.ExecuteNonQuery();
+
                 if (span != null)
                 {
                     span.SetMeta("sql.RowsAffected", result.ToString());
                     SetMeta(span);
                 }
+
                 return result;
             }
             catch (Exception ex)
@@ -59,21 +113,23 @@ namespace DataDog.Tracing.Sql
             }
         }
 
-        public IDataReader ExecuteReader() => ExecuteReader(CommandBehavior.Default);
-
-        public IDataReader ExecuteReader(CommandBehavior behavior)
+        public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
         {
-            const string name = "sql." + nameof(ExecuteReader);
+            const string name = "sql." + nameof(ExecuteNonQueryAsync);
+
             var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
             try
             {
+                int result = await _command.ExecuteNonQueryAsync(cancellationToken);
+
                 if (span != null)
                 {
-                    const string metaKey = "sql." + nameof(CommandBehavior);
-                    span.SetMeta(metaKey, behavior.ToString("x"));
+                    span.SetMeta("sql.RowsAffected", result.ToString());
                     SetMeta(span);
                 }
-                return _command.ExecuteReader(behavior);
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -86,13 +142,19 @@ namespace DataDog.Tracing.Sql
             }
         }
 
-        public object ExecuteScalar()
+        public override object ExecuteScalar()
         {
             const string name = "sql." + nameof(ExecuteScalar);
-            var span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
+            ISpan span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
             try
             {
-                if (span != null) SetMeta(span);
+                if (span != null)
+                {
+                    SetMeta(span);
+                }
+
                 return _command.ExecuteScalar();
             }
             catch (Exception ex)
@@ -106,44 +168,123 @@ namespace DataDog.Tracing.Sql
             }
         }
 
-        public void Prepare() => _command.Prepare();
-
-        public string CommandText
+        public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
         {
-            get => _command.CommandText;
-            set => _command.CommandText = value;
+            const string name = "sql." + nameof(ExecuteScalarAsync);
+
+            ISpan span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
+            try
+            {
+                if (span != null)
+                {
+                    SetMeta(span);
+                }
+
+                return await _command.ExecuteScalarAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                span?.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                span?.Dispose();
+            }
+        }
+        
+        protected override DbDataReader ExecuteDbDataReader(CommandBehavior behavior)
+        {
+            const string name = "sql." + nameof(ExecuteDbDataReader);
+
+            ISpan span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
+            try
+            {
+                if (span != null)
+                {
+                    const string metaKey = "sql." + nameof(CommandBehavior);
+
+                    span.SetMeta(metaKey, behavior.ToString("x"));
+                    SetMeta(span);
+                }
+
+                return _command.ExecuteReader(behavior);
+            }
+            catch (Exception ex)
+            {
+                span?.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                span?.Dispose();
+            }
         }
 
-        public int CommandTimeout
+        protected override async Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
         {
-            get => _command.CommandTimeout;
-            set => _command.CommandTimeout = value;
+            const string name = "sql." + nameof(ExecuteDbDataReaderAsync);
+
+            ISpan span = _spanSource.Begin(name, ServiceName, _command.Connection.Database, ServiceName);
+
+            try
+            {
+                if (span != null)
+                {
+                    const string metaKey = "sql." + nameof(CommandBehavior);
+
+                    span.SetMeta(metaKey, behavior.ToString("x"));
+                    SetMeta(span);
+                }
+
+                return await _command.ExecuteReaderAsync(behavior, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                span?.SetError(ex);
+                throw;
+            }
+            finally
+            {
+                span?.Dispose();
+            }
         }
 
-        public CommandType CommandType
+        public override void Prepare()
         {
-            get => _command.CommandType;
-            set => _command.CommandType = value;
+            _command.Prepare();
         }
 
-        public IDbConnection Connection
+        #endregion
+
+        #region Private Methods
+        
+        private void SetMeta(ISpan span)
         {
-            get => _command.Connection;
-            set => _command.Connection = value;
+            span.SetMeta("sql.CommandText", CommandText);
+            span.SetMeta("sql.CommandType", CommandType.ToString());
         }
 
-        public IDataParameterCollection Parameters => _command.Parameters;
+        #endregion
+        
+        #region Dispose Pattern
 
-        public IDbTransaction Transaction
+        private bool _disposed;
+
+        protected override void Dispose(bool disposing)
         {
-            get => _command.Transaction;
-            set => _command.Transaction = value;
+            if (disposing && !_disposed)
+            {
+                _command?.Dispose();
+            }
+
+            _disposed = true;
+
+            base.Dispose(disposing);
         }
 
-        public UpdateRowSource UpdatedRowSource
-        {
-            get => _command.UpdatedRowSource;
-            set => _command.UpdatedRowSource = value;
-        }
+        #endregion
     }
 }
