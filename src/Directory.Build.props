@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <Version>1.0.5</Version>
-    <AssemblyVersion>1.0.5</AssemblyVersion>
+    <Version>1.0.6</Version>
+    <AssemblyVersion>1.0.6</AssemblyVersion>
     <Authors>bcuff</Authors>
     <Company>bcuff</Company>
     <Copyright>2017</Copyright>
