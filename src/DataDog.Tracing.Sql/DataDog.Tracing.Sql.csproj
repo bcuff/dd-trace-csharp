@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>datadog tracing apm sql</PackageTags>
     <Description>A C# client implementation for DataDog's APM solution for tracing ADO .NET implementations.</Description>
   </PropertyGroup>

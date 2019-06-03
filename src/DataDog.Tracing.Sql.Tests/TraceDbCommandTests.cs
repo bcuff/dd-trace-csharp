@@ -43,7 +43,7 @@ namespace DataDog.Tracing.Sql.Tests
                 }
             }
             customers.Count.Should().Be(2);
-            _root.Spans[1].Name.Should().Be("sql." + nameof(IDbCommand.ExecuteReader));
+            _root.Spans[1].Name.Should().Be("sql.ExecuteDbDataReader");
             _root.Spans[1].Service.Should().Be("sql");
             _root.Spans[1].Resource.Should().Be("main");
             _root.Spans[1].Type.Should().Be("sql");
