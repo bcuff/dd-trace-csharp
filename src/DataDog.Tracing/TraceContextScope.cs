@@ -7,7 +7,7 @@ namespace DataDog.Tracing
     /// <summary>
     /// Sets up the TraceContext.Current with the specified trace.
     /// </summary>
-    public class TraceContextScope : IDisposable
+    public sealed class TraceContextScope : IDisposable
     {
         readonly ISpan _old;
         ISpan _span;
