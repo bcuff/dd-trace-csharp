@@ -7,6 +7,7 @@ namespace DataDog.Tracing
 {
     sealed class RootSpan : Span
     {
+        readonly int? _maxSpans;
         readonly IObserver<Trace> _observer;
 
         public RootSpan()
@@ -14,9 +15,10 @@ namespace DataDog.Tracing
             Spans.Add(this);
         }
 
-        public RootSpan(IObserver<Trace> observer)
+        public RootSpan(IObserver<Trace> observer, int? maxSpans)
             : this()
         {
+            _maxSpans = maxSpans;
             _observer = observer;
         }
 
@@ -25,7 +27,10 @@ namespace DataDog.Tracing
             lock (this)
             {
                 EnsureNotSealed();
-                Spans.Add(child);
+                if (_maxSpans == null || Spans.Count < _maxSpans)
+                {
+                    Spans.Add(child);
+                }
             }
             base.OnBeginChild(child);
             child.BeginChild += OnBeginChild;
