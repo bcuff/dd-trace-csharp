@@ -9,7 +9,7 @@
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataDog.Tracing.AspNetCore\DataDog.Tracing.AspNetCore.csproj" />
